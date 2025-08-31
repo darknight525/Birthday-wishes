@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Romantic Birthday Interactive 2025</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@700,500,400&display=swap" rel="stylesheet" />
+  <!-- Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    /* BASE RESET & LAYOUT */
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow-x: hidden;
+      background-color: #0c0a09;
+      font-family: 'Satoshi', sans-serif;
+      color: #e7e5e4;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding-top: 4rem;
+      min-height: 100vh;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: 'Playfair Display', serif;
+      line-height: 1.1;
+      font-weight: 700;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    /* PROGRESS BAR */
+    .progress-track {
+      position: fixed;
+      top: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(600px, 90vw);
+      height: 6px;
+      background: rgba(255 255 255 / 0.18);
+      backdrop-filter: blur(10px);
+      border-radius: 9999px;
+      z-index: 50;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      background-image: linear-gradient(to right, #ec4899, #ef4444);
+      border-radius: 9999px;
+      transition: width 0.5s ease;
+    }
+
+    /* MAIN WRAPPER */
+    .main-wrapper {
+      max-width: 600px;
+      width: 95vw;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* GLASS CARD */
+    .card {
+      background: rgba(255 255 255 / 0.1);
+      border-radius: 1.5rem;
+      padding: 2.5rem 2rem 3rem;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45), inset 0 0 40px 8px rgb(255 255 255 / 0.05);
+      border: 1px solid rgba(255 255 255 / 0.15);
+      backdrop-filter: blur(20px);
+      position: relative;
+      color: #fdefef;
+      display: none;
+      flex-direction: column;
+      opacity: 0;
+      transform: scale(0.95) translateY(20px);
+      transition: opacity 0.7s cubic-bezier(.23,.82,.75,.89), transform 0.5s cubic-bezier(.23,.82,.75,.89);
+    }
+
+    .card.active {
+      display: flex;
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+
+    /* BUTTON */
+    button.next-btn {
+      align-self: center;
+      margin-top: 1.5rem;
+      background: linear-gradient(to right, #ec4899, #ef4444);
+      color: white;
+      font-weight: 700;
+      padding: 0.9rem 2.4rem;
+      border-radius: 9999px;
+      font-size: 1.125rem;
+      box-shadow: 0 0 30px #ec4899cc;
+      transition: all 0.3s ease;
+      border: none;
+      user-select: none;
+      outline-offset: 4px;
+    }
+
+    button.next-btn:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 0 50px #ef4444cc;
+    }
+
+    button.next-btn:active {
+      transform: translateY(0) scale(1);
+      box-shadow: 0 0 15px #ef4444cc;
+    }
+
+    /* ICONS */
+    .icon-large {
+      font-size: 5rem;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 20px #ef4da4;
+      user-select: none;
+    }
+
+    /* TEXT GRADIENT */
+    .text-gradient {
+      background: linear-gradient(to right, #fda4af, #ffffff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-fill-color: transparent;
+    }
+
+    /* BENTO GRID STEP 3 */
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.4rem;
+      margin-top: 1rem;
+    }
+
+    .bento-card {
+      background: rgba(255 255 255 / 0.05);
+      border-radius: 1rem;
+      padding: 1.2rem 1.5rem;
+      box-shadow: 0 0 18px #ef4da4aa inset;
+      font-weight: 600;
+      color: #fce7f3;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .bento-card.title {
+      font-size: 1.3rem;
+      text-align: center;
+      grid-column: 1 / -1;
+      font-weight: 700;
+    }
+
+    .bento-card:hover {
+      box-shadow: 0 0 45px #ef4da4dd inset;
+    }
+
+    .bento-card>h3 {
+      font-size: 1.3rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .bento-card>p {
+      font-weight: 400;
+      font-size: 1rem;
+      color: #f9cde9;
+    }
+
+    /* MESSAGE */
+    .final-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      margin-top: 1rem;
+      text-align: center;
+      background: linear-gradient(45deg, #F472B6, #FB7185, #F43F5E);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: fadeInScale 1.4s ease forwards;
+      opacity: 0;
+      transform: scale(0.9);
+      user-select: none;
+    }
+
+    @keyframes fadeInScale {
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="progress-track" aria-hidden="true">
+    <div id="progress-bar" class="progress-fill"></div>
+  </div>
+
+  <div class="main-wrapper" role="main" aria-live="polite" aria-atomic="true">
+    <!-- Step 1 -->
+    <section id="step-1" class="card active" aria-label="Step 1: The Grand Welcome">
+      <div class="icon-large" aria-hidden="true">❤️</div>
+      <h1 class="text-gradient">Hey Beautiful,</h1>
+      <p>I built a little world for you, just to bring a smile to your face on your special day.</p>
+      <button type="button" class="next-btn" aria-label="Let's Begin">Let's Begin</button>
+    </section>
+
+    <!-- Step 2 -->
+    <section id="step-2" class="card" aria-label="Step 2: The Core Message">
+      <div class="icon-large" aria-hidden="true">🎉</div>
+      <h1 class="text-gradient">Happy Birthday!</h1>
+      <p>Another year of you making the world brighter. Your existence is a gift, and I'm so lucky to witness it.</p>
+      <button type="button" class="next-btn" aria-label="There's more">There's more...</button>
+    </section>
+
+    <!-- Step 3 -->
+    <section id="step-3" class="card" aria-label="Step 3: The Reasons Why">
+      <h1 class="text-gradient mb-4">A Few Things I Adore About You</h1>
+      <div class="bento-grid" role="list">
+        <div class="bento-card title" role="listitem">
+          <h3>✨ Your Unmatched Kindness</h3>
+          <p>The genuine warmth you show to everyone is something truly rare and beautiful.</p>
+        </div>
+        <div class="bento-card" role="listitem">
+          <h3>😊 That Smile</h3>
+          <p>It's a work of art.</p>
+        </div>
+        <div class="bento-card title" role="listitem">
+          <h3>🌟 Your Radiant Spirit</h3>
+          <p>Your passion for life is infectious. Being around you makes everything feel more exciting and possible.</p>
+        </div>
+      </div>
+      <button type="button" class="next-btn" aria-label="Remember this?">Remember this?</button>
+    </section>
+
+    <!-- Step 4 (personal message) -->
+    <section id="step-4" class="card" aria-label="Step 4: The Personalized Birthday Wish">
+      <h1 class="text-gradient mb-6">A Special Message for You</h1>
+      <p style="white-space: pre-line; color:#f9cee4; font-weight:600; font-size:1.1rem; line-height:1.5;">
+Happy Birthday to Someone Truly Special!
+Today, the world shines a little brighter, smiles feel warmer, and hearts beat with extra joy — all because it's your day.
+You bring light, love, and laughter wherever you go, and anyone lucky enough to know you is better for it.
+May this year bless you with unforgettable moments, endless happiness, and everything your heart desires.
+Keep being the amazing soul you are — the world is better with you in it.
+Wishing you a birthday as beautiful and special as you are. 🎉💖🌟
+      </p>
+      <button type="button" class="next-btn" aria-label="One last thing">One last thing...</button>
+    </section>
+
+    <!-- Step 5 -->
+    <section id="step-5" class="card" aria-label="Step 5: The Birthday Wish & Finale">
+      <div class="icon-large" aria-hidden="true">🎂</div>
+      <h1 class="text-gradient">My Wish For You</h1>
+      <p>May the next year bring you all the love, success, and pure happiness you so rightfully deserve. May your dreams soar higher than ever.</p>
+      <p id="final-text" class="final-text" aria-live="assertive" aria-atomic="true"></p>
+      <button type="button" id="celebrate-btn" class="next-btn" aria-label="Celebrate!">Celebrate!</button>
+    </section>
+  </div>
+
+  <!-- 3D Hearts Canvas -->
+  <canvas id="three-canvas"
+    style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events:none; z-index: 5;">
+  </canvas>
+
+  <script>
+    // --- STEP NAVIGATION SETUP ---
+    const steps = [...document.querySelectorAll('.card')];
+    const progressBar = document.getElementById('progress-bar');
+    let currentStep = 0;
+
+    function showStep(index) {
+      steps.forEach((step, i) => {
+        if (i === index) step.classList.add('active');
+        else step.classList.remove('active');
+      });
+      currentStep = index;
+      progressBar.style.width = (index / (steps.length - 1)) * 100 + '%';
+    }
+
+    showStep(0);
+
+    // Next buttons triggers next step
+    const nextButtons = document.querySelectorAll('.next-btn');
+    nextButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (currentStep < steps.length - 1) {
+          showStep(currentStep + 1);
+        }
+      });
+    });
+
+    // --- THREE.JS 3D HEARTS INITIALIZATION ---
+    const canvas = document.getElementById('three-canvas');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({
+      canvas: canvas,
+      alpha: true
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    let hearts = [];
+    let finalAnimation = false;
+
+    function createHeartGeometry() {
+      const shape = new THREE.Shape();
+      shape.moveTo(25, 25);
+      shape.bezierCurveTo(25, 25, 20, 0, 0, 0);
+      shape.bezierCurveTo(-30, 0, -30, 35, -30, 35);
+      shape.bezierCurveTo(-30, 55, -10, 77, 25, 95);
+      shape.bezierCurveTo(60, 77, 80, 55, 80, 35);
+      shape.bezierCurveTo(80, 35, 80, 0, 50, 0);
+      shape.bezierCurveTo(35, 0, 25, 25, 25, 25);
+      return shape;
+    }
+
+    function initHearts() {
+      const geo = new THREE.ExtrudeGeometry(createHeartGeometry(), {
+        depth: 6,
+        bevelEnabled: true,
+        bevelSegments: 2,
+        steps: 2,
+        bevelSize: 1,
+        bevelThickness: 1
+      });
+      for (let i = 0; i < 25; i++) {
+        const mat = new THREE.MeshStandardMaterial({
+          color: new THREE.Color(`hsl(${330 + Math.random() * 30}, 80%, 70%)`),
+          metalness: 0.1,
+          roughness: 0.3,
+          emissive: new THREE.Color(0xff3366).multiplyScalar(0.3)
+        });
+        const heart = new THREE.Mesh(geo, mat);
+        heart.position.set(
+          (Math.random() - 0.5) * 20,
+          (Math.random() - 0.5) * 20,
+          (Math.random() - 0.5) * 20
+        );
+        heart.rotation.set(
+          Math.random() * Math.PI,
+          Math.random() * Math.PI,
+          Math.random() * Math.PI
+        );
+        const scale = Math.random() * 0.03 + 0.015;
+        heart.scale.set(scale, scale, scale);
+        heart.userData.initialPos = heart.position.clone();
+        heart.userData.offset = Math.random() * 100;
+        scene.add(heart);
+        hearts.push(heart);
+      }
+      scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+      const dl = new THREE.DirectionalLight(0xffffff, 1);
+      dl.position.set(5, 5, 5);
+      scene.add(dl);
+      camera.position.z = 20;
+    }
+
+    function animateHearts() {
+      requestAnimationFrame(animateHearts);
+      hearts.forEach((h, i) => {
+        if (finalAnimation) {
+          h.position.y += 0.07 + i * 0.002;
+          h.rotation.x += 0.03;
+          h.rotation.y += 0.03;
+        } else {
+          const t = Date.now() * 0.001 + h.userData.offset;
+          h.position.y = h.userData.initialPos.y + Math.sin(t) * 0.6;
+          h.rotation.x += 0.008;
+          h.rotation.y += 0.008;
+        }
+      });
+      renderer.render(scene, camera);
+    }
+
+    initHearts();
+    animateHearts();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // --- GRAND FINALE ---
+    const celebrateBtn = document.getElementById('celebrate-btn');
+    const finalText = document.getElementById('final-text');
+    celebrateBtn.addEventListener('click', () => {
+      // Animate button out
+      gsap.to(celebrateBtn, {
+        opacity: 0,
+        y: 20,
+        duration: 0.5,
+        onComplete: () => celebrateBtn.style.display = 'none'
+      });
+      // Final message appearance
+      gsap.to(finalText, {
+        opacity: 1,
+        y: -20,
+        duration: 1,
+        delay: 0.3,
+        ease: 'power3.out'
+      });
+
+      // Make hearts float upward and fade
+      finalAnimation = true;
+      gsap.to(hearts, {
+        duration: 6,
+        onComplete: () => {
+          hearts.forEach(h => scene.remove(h));
+          hearts = [];
+        }
+      });
+
+      // Confetti bursts from bottom corners
+      const duration = 5 * 1000;
+      const animationEnd = Date.now() + duration;
+      const defaults = {
+        startVelocity: 30,
+        spread: 360,
+        ticks: 60,
+        zIndex: 10000
+      };
+      const randomInRange = (min, max) => Math.random() * (max - min) + min;
+
+      const confettiInterval = setInterval(() => {
+        const timeLeft = animationEnd - Date.now();
+        if (timeLeft <= 0) {
+          clearInterval(confettiInterval);
+          return;
+        }
+        const particleCount = 50 * (timeLeft / duration);
+        confetti({
+          ...defaults,
+          particleCount,
+          origin: {
+            x: randomInRange(0.1, 0.4),
+            y: Math.random() - 0.2
+          }
+        });
+        confetti({
+          ...defaults,
+          particleCount,
+          origin: {
+            x: randomInRange(0.6, 0.9),
+            y: Math.random() - 0.2
+          }
+        });
+      }, 250);
+
+      // Emoji confetti
+      const emojiInterval = setInterval(() => {
+        const timeLeft = animationEnd - Date.now();
+        if (timeLeft <= 0) return clearInterval(emojiInterval);
+        confetti({
+          particleCount: 5,
+          startVelocity: 45,
+          spread: 90,
+          origin: {
+            x: Math.random(),
+            y: Math.random() - 0.2
+          },
+          shapes: [confetti.shapeFromText({
+            text: '❤️'
+          }), confetti.shapeFromText({
+            text: '💖'
+          }), confetti.shapeFromText({
+            text: '✨'
+          })],
+          scalar: 2
+        });
+      }, 500);
+    });
+  </script>
+</body>
+
+</html>
